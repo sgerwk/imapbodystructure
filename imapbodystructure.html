@@ -1,0 +1,659 @@
+<html>
+<head>
+<title>IMAP BODYSTRUCTURE: formatted examples</title>
+<style>
+span.part { background-color: yellow; }
+span.list { background-color: cyan; }
+span.seq { background-color: green; }
+</style>
+</head>
+
+<body>
+
+<h1>IMAP BODYSTRUCTURE: formatted examples</h1>
+
+<p>
+The IMAP specification <a
+href="https://tools.ietf.org/html/rfc3501">rfc3501</a> is unclear about the
+<i>body structure</i> part of an email. Below are some examples with
+explanations. They are all real body structures as returned by IMAP servers in
+response to <tt>FETCH messagenumber BODYSTRUCTURE</tt> commands. For each:
+</p>
+
+<ul>
+
+<li>the exact reply from the IMAP server is shown;
+
+<li>the same reply is presented pretty-printed to emphasize its parts and the
+way they are combined, with colors added;
+
+<li>finally, they are explained in words.
+
+</ul>
+
+<p> 
+The program used for formatting is
+<a href="http://github.com/sgerwk/imapbodystructure">imapbodystructure</a>.
+The
+colors have been added manually to highlight the content parts of the email and
+the way they are combined: yellow for <span class="part">parts</span> and cyan
+for their <span class="list">combinations</span>.
+</p>
+
+
+
+<h3>single-part email</h3>
+
+<p>
+This is the body structure of a mail made of a single part only.
+</p>
+
+<dl>
+
+<dt>IMAP server reply:
+<dd>
+
+<p><tt>
+* 15 FETCH (BODYSTRUCTURE ("TEXT" "PLAIN" ("CHARSET" "iso-8859-1") NIL NIL "QUOTED-PRINTABLE" 1315 42 NIL NIL NIL NIL))
+</tt></p>
+
+<dt>indented:
+<dd>
+
+<pre>
+*
+15
+FETCH
+(
+    BODYSTRUCTURE
+    (<span class="part">"TEXT" "PLAIN"</span> ("CHARSET" "iso-8859-1") NIL NIL "QUOTED-PRINTABLE" 1315 42 NIL NIL NIL NIL)
+)
+</pre>
+
+</dl>
+
+<p>
+The whole bodystructure is a single part of type
+<span class="part">"TEXT/PLAIN"</span>.
+</p>
+
+<p>
+Such mails are rarely seen nowadays. An even more uncommon form has a single
+part of type <tt>TEXT/HTML</tt>. Modern mail clients send mail in the next form
+(text+html) instead, but a single-part email can still be obtained by:
+<tt>echo -e "Subject: example\n\nabcd" | sendmail name@domain.com</tt>.
+</p>
+
+
+<h3>text + html</h3>
+
+<p>
+Most email client send emails in both text and html. The content is the same,
+but html also includes formatting.
+</p>
+
+<dl>
+
+<dt>IMAP server reply
+<dd>
+
+<p><tt>
+* 1 FETCH (BODYSTRUCTURE (("TEXT" "PLAIN" ("CHARSET" "iso-8859-1") NIL NIL "QUOTED-PRINTABLE" 2234 63 NIL NIL NIL NIL)("TEXT" "HTML" ("CHARSET" "iso-8859-1") NIL NIL "QUOTED-PRINTABLE" 2987 52 NIL NIL NIL NIL) "ALTERNATIVE" ("BOUNDARY" "d3438gr7324") NIL NIL NIL))
+</tt></p>
+
+<dt>indented:
+<dd>
+
+<pre>
+*
+1
+FETCH
+(
+    BODYSTRUCTURE
+    (
+        (<span class="part">"TEXT" "PLAIN"</span> ("CHARSET" "iso-8859-1") NIL NIL "QUOTED-PRINTABLE" 2234 63 NIL NIL NIL NIL)
+        (<span class="part">"TEXT" "HTML"</span> ("CHARSET" "iso-8859-1") NIL NIL "QUOTED-PRINTABLE" 2987 52 NIL NIL NIL NIL)
+        <span class="list">"ALTERNATIVE"</span>
+        ("BOUNDARY" "d3438gr7324")
+        NIL
+        NIL
+        NIL
+    )
+)
+</pre>
+
+</dl>
+
+<p>
+This is an <span class="list"><tt>ALTERNATIVE</tt></span> between two parts: a
+<span class="part"><tt>TEXT/PLAIN</tt></span> and a <span
+class="part"><tt>TEXT/HTML</tt></span>. That these two parts are in alternative
+means that they have the same content, so that the mail client can choose which
+one to show to the user.
+</p>
+
+<p>
+In general, a multi-part alternative message is represented by a list:
+</p>
+
+<blockquote><tt>
+(PART1 PART2 PART3 ... "ALTERNATIVE" A B C...)
+</tt></blockquote>
+
+<p>
+The parts that are in alternative are <tt>PART1</tt>, <tt>PART2</tt>,
+<tt>PART3</tt>, etc. The string <tt>"ALTERNATIVE"</tt> has two roles: it marks
+the end of the parts and tells that these parts are alternative representations
+of the same content. The following elements <tt>A B C...</tt> are attributes of
+the list, not additional parts.
+</p>
+
+<p>
+This form also applies to the other lists: <tt>RELATED</tt> and <tt>MIXED</tt>.
+</p>
+
+
+
+<h3>mail with images</h3>
+
+<p>
+Mails can be sent with images in them. This is obtained by an html part with an
+associated set of images.
+</p>
+
+<dl>
+
+<dt>IMAP server reply:
+<dd>
+
+<p><tt>
+* 335 FETCH (BODYSTRUCTURE (("TEXT" "HTML" ("CHARSET" "US-ASCII") NIL NIL "7BIT" 119 2 NIL ("INLINE" NIL) NIL)("IMAGE" "JPEG" ("NAME" "4356415.jpg") "<0__=rhksjt>" NIL "BASE64" 143804 NIL ("INLINE" ("FILENAME" "4356415.jpg")) NIL) "RELATED" ("BOUNDARY" "0__=5tgd3d") ("INLINE" NIL) NIL))
+</p></tt>
+
+<dt>indented:
+
+<pre>
+*
+335
+FETCH
+(
+    BODYSTRUCTURE
+    (
+        (<span class="part">"TEXT" "HTML"</span> ("CHARSET" "US-ASCII") NIL NIL "7BIT" 119 2 NIL ("INLINE" NIL) NIL)
+        (<span class="part">"IMAGE" "JPEG"</span> ("NAME" "4356415.jpg") "<0__=rhksjt>" NIL "BASE64" 143804 NIL ("INLINE" ("FILENAME" "4356415.jpg")) NIL)
+        <span class="list">"RELATED"</span>
+        ("BOUNDARY" "0__=5tgd3d")
+        ("INLINE" NIL)
+        NIL
+    )
+)
+</pre>
+
+</dl>
+
+<p>
+This message contains two parts: a <span class="part"><tt>TEXT/HTML</tt></span>
+and an <span class="part"><tt>IMAGE/JPEG</tt></span> image. The intention is
+that the user is shown the html part with the image embedded into it in the
+appropriate place. The two parts are to be presented together, not
+alternatively. As a result, they are combined as
+<span class="list"><tt>RELATED</tt></span>, not as alternatives.
+</p>
+
+
+
+<h3>text + html with images</h3>
+
+<p>
+Most mail with images still contain an alternative text-only version.
+</p>
+
+<dl>
+
+<dt>IMAP server reply:
+<dd>
+
+<p><tt>
+* 202 FETCH (BODYSTRUCTURE (("TEXT" "PLAIN" ("CHARSET" "ISO-8859-1" "FORMAT" "flowed") NIL NIL "QUOTED-PRINTABLE" 2815 73 NIL NIL NIL NIL)(("TEXT" "HTML" ("CHARSET" "ISO-8859-1") NIL NIL "QUOTED-PRINTABLE" 4171 66 NIL NIL NIL NIL)("IMAGE" "JPEG" ("NAME" "image.jpg") "&lt;3245dsf7435&gt;" NIL "BASE64" 189906 NIL NIL NIL NIL)("IMAGE" "GIF" ("NAME" "other.gif") "&lt;32f6324f&gt;" NIL "BASE64" 1090 NIL NIL NIL NIL) "RELATED" ("BOUNDARY" "--=sdgqgt") NIL NIL NIL) "ALTERNATIVE" ("BOUNDARY" "--=u5sfrj") NIL NIL NIL))
+</tt></p>
+
+<dt>indented:
+<dd>
+
+<pre>
+*
+202
+FETCH
+(
+    BODYSTRUCTURE
+    (
+        (<span class="part">"TEXT" "PLAIN"</span> ("CHARSET" "ISO-8859-1" "FORMAT" "flowed") NIL NIL "QUOTED-PRINTABLE" 2815 73 NIL NIL NIL NIL)
+        (
+            (<span class="part">"TEXT" "HTML"</span> ("CHARSET" "ISO-8859-1") NIL NIL "QUOTED-PRINTABLE" 4171 66 NIL NIL NIL NIL)
+            (<span class="part">"IMAGE" "JPEG"</span> ("NAME" "image.jpg") "&lt;3245dsf7435&gt;" NIL "BASE64" 189906 NIL NIL NIL NIL)
+            (<span class="part">"IMAGE" "GIF"</span> ("NAME" "other.gif") "&lt;32f6324f&gt;" NIL "BASE64" 1090 NIL NIL NIL NIL)
+            <span class="list">"RELATED"</span>
+            ("BOUNDARY" "--=sdgqgt")
+            NIL
+            NIL
+            NIL
+        )
+        <span class="list">"ALTERNATIVE"</span>
+        ("BOUNDARY" "--=u5sfrj")
+        NIL
+        NIL
+        NIL
+    )
+)
+</pre>
+
+</dl>
+
+<p>
+At the highest level, this email is an
+<span class="list"><tt>ALTERNATIVE</tt></span> between a
+<span class="part"><tt>TEXT/PLAIN</tt></span>
+part and a second part that contains an
+html file and two images.
+</p>
+
+<p>
+This second part is a set of three <span class="list"><tt>RELATED</tt></span>
+parts, of type
+<span class="part"><tt>TEXT/HTML</tt></span>,
+<span class="part"><tt>IMAGE/JPEG</tt></span> and
+<span class="part"><tt>IMAGE.GIF</tt></span>.
+These parts are not alternative views of the same content, but
+rather they all contribute to what is to be shown to the user.
+</p>
+
+
+
+<h3>mail with images</h3>
+
+<p>
+This is a different form of an email containing text and alternatively html and
+images. Is a common form, but the way images are associated to the text appear
+incorrect.
+</p>
+
+<dl>
+
+<dt>IMAP server reply:
+<dd>
+
+<p><tt>
+* 41 FETCH (BODYSTRUCTURE ((("TEXT" "PLAIN" ("CHARSET" "ISO-8859-1") NIL NIL "QUOTED-PRINTABLE" 471 28 NIL NIL NIL)("TEXT" "HTML" ("CHARSET" "ISO-8859-1") NIL NIL "QUOTED-PRINTABLE" 1417 36 NIL ("INLINE" NIL) NIL) "ALTERNATIVE" ("BOUNDARY" "1__=hqjksdm") NIL NIL)("IMAGE" "GIF" ("NAME" "image.gif") "&lt;1__=cxdf2f&gt;" NIL "BASE64" 50294 NIL ("INLINE" ("FILENAME" "image.gif")) NIL) "RELATED" ("BOUNDARY" "0__=hqjksdm") NIL NIL))
+</tt></p>
+
+<dt>indented:
+<dd>
+
+<pre>
+*
+41
+FETCH
+(
+    BODYSTRUCTURE
+    (
+        (
+            (<span class="part">"TEXT" "PLAIN"</span> ("CHARSET" "ISO-8859-1") NIL NIL "QUOTED-PRINTABLE" 471 28 NIL NIL NIL)
+            (<span class="part">"TEXT" "HTML"</span> ("CHARSET" "ISO-8859-1") NIL NIL "QUOTED-PRINTABLE" 1417 36 NIL ("INLINE" NIL) NIL)
+            <span class="list">"ALTERNATIVE"</span>
+            ("BOUNDARY" "1__=hqjksdm")
+            NIL
+            NIL
+        )
+        (<span class="part">"IMAGE" "GIF"</span> ("NAME" "image.gif") "&lt;1__=cxdf2f&gt;" NIL "BASE64" 50294 NIL ("INLINE" ("FILENAME" "image.gif")) NIL)
+        <span class="list">"RELATED"</span>
+        ("BOUNDARY" "0__=hqjksdm")
+        NIL
+        NIL
+    )
+)
+</pre>
+
+</dl>
+
+<p>
+The image is associated to both the text and the html parts, while it should be
+associated to the html part only. The intention might have been that the image
+is shown alongside the text of the email even if the text part is presented
+instead of html.
+</p>
+
+
+
+<h3>mail with attachment</h3>
+
+<p>
+Mails with attachments have this structure. In this particular example, the
+attachment is a single pdf file, while the text of the mail is in a single html
+part (no text alternative, in this case).
+</p>
+
+<dl>
+
+<dt>IMAP server reply:
+<dd>
+
+<p><tt>
+* 302 FETCH (BODYSTRUCTURE (("TEXT" "HTML" ("CHARSET" "ISO-8859-1") NIL NIL "QUOTED-PRINTABLE" 4692 69 NIL NIL NIL NIL)("APPLICATION" "PDF" ("NAME" "pages.pdf") NIL NIL "BASE64" 38838 NIL ("attachment" ("FILENAME" "pages.pdf")) NIL NIL) "MIXED" ("BOUNDARY" "----=6fgshr") NIL NIL NIL))
+</tt></p>
+
+<dt>indented:
+<dd>
+
+<pre>
+*
+302
+FETCH
+(
+    BODYSTRUCTURE
+    (
+        (<span class="part">"TEXT" "HTML"</span> ("CHARSET" "ISO-8859-1") NIL NIL "QUOTED-PRINTABLE" 4692 69 NIL NIL NIL NIL)
+        (<span class="part">"APPLICATION" "PDF"</span> ("NAME" "pages.pdf") NIL NIL "BASE64" 38838 NIL ("attachment" ("FILENAME" "pages.pdf")) NIL NIL)
+        <span class="list">"MIXED"</span>
+        ("BOUNDARY" "----=6fgshr")
+        NIL
+        NIL
+        NIL
+    )
+)
+</pre>
+
+</dl>
+
+<p>
+This is a <span class="list"><tt>MIXED</tt></span> list of two parts: a <span
+class="part"><tt>TEXT/HTML</tt></span> part which is the text of the email and
+and <span class="part"><tt>APPLICATION/PDF</tt></span> part which is the
+attachment.
+</p>
+
+<p>
+<tt>MIXED</tt> lists differ from the <tt>ALTERNATIVE</tt> and <tt>RELATED</tt>
+lists because the two parts are not in alternative (only the html is shown to
+the user; the pdf is usually only accessible via a link that can be followed)
+and are not related (the pdf file is not shown as embedded in the html part).
+The two parts contain different information and are not supposed to be shown
+together.
+</p>
+
+
+
+<h3>alternative and attachment</h3>
+
+<p>
+A mail may contain an attachment and still offer two alternative representation
+of its text content.
+</p>
+
+<dl>
+
+<dt>IMAP server reply:
+<dd>
+
+<p><tt>
+* 356 FETCH (BODYSTRUCTURE ((("TEXT" "PLAIN" ("CHARSET" "UTF-8") NIL NIL "QUOTED-PRINTABLE" 403 6 NIL NIL NIL NIL)("TEXT" "HTML" ("CHARSET" "UTF-8") NIL NIL "QUOTED-PRINTABLE" 421 6 NIL NIL NIL NIL) "ALTERNATIVE" ("BOUNDARY" "----=fghgf3") NIL NIL NIL)("APPLICATION" "MSWORD" ("NAME" "letter.doc") NIL NIL "BASE64" 110000 NIL ("attachment" ("FILENAME" "letter.doc" "SIZE" "80384")) NIL NIL) "MIXED" ("BOUNDARY" "----=y34fgl") NIL NIL NIL))
+</tt></p>
+
+<dt>indented:
+<dd>
+
+<pre>
+*
+356
+FETCH
+(
+    BODYSTRUCTURE
+    (
+        (
+            (<span class="part">"TEXT" "PLAIN"</span> ("CHARSET" "UTF-8") NIL NIL "QUOTED-PRINTABLE" 403 6 NIL NIL NIL NIL)
+            (<span class="part">"TEXT" "HTML"</span> ("CHARSET" "UTF-8") NIL NIL "QUOTED-PRINTABLE" 421 6 NIL NIL NIL NIL)
+            <span class="list">"ALTERNATIVE"</span>
+            ("BOUNDARY" "----=fghgf3")
+            NIL
+            NIL
+            NIL
+        )
+        (<span class="part">"APPLICATION" "MSWORD"</span> ("NAME" "letter.doc") NIL NIL "BASE64" 110000 NIL ("attachment" ("FILENAME" "letter.doc" "SIZE" "80384")) NIL NIL)
+        <span class="list">"MIXED"</span>
+        ("BOUNDARY" "----=y34fgl")
+        NIL
+        NIL
+        NIL
+    )
+)
+</pre>
+
+</dl>
+
+<p>
+This is another example of how combinations of parts can nest.
+Overall, this mail has some text and an attachment
+<span class="part"><tt>APPLICATION/MSWORD</tt></span>, the word file
+<tt>letter.doc</tt>. The text is itself an <span
+class="list"><tt>ALTERNATIVE</tt></span> between
+<span class="part"><tt>TEXT/PLAIN</tt></span> and <span
+class="part"><tt>TEXT/HTML</tt></span>.
+</p>
+
+
+
+<h3>all together</h3>
+
+<p>
+This email has attachment, and its text is an alternative between text and
+html with images.
+</p>
+
+<dl>
+
+<dt>IMAP server reply:
+<dd>
+
+<p><tt>
+* 1569 FETCH (BODYSTRUCTURE (((("TEXT" "PLAIN" ("CHARSET" "ISO-8859-1") NIL NIL "QUOTED-PRINTABLE" 833 30 NIL NIL NIL)("TEXT" "HTML" ("CHARSET" "ISO-8859-1") NIL NIL "QUOTED-PRINTABLE" 3412 62 NIL ("INLINE" NIL) NIL) "ALTERNATIVE" ("BOUNDARY" "2__=fgrths") NIL NIL)("IMAGE" "GIF" ("NAME" "485039.gif") "&lt;2__=lgkfjr&gt;" NIL "BASE64" 64 NIL ("INLINE" ("FILENAME" "485039.gif")) NIL) "RELATED" ("BOUNDARY" "1__=fgrths") NIL NIL)("APPLICATION" "PDF" ("NAME" "title.pdf") "&lt;1__=lgkfjr&gt;" NIL "BASE64" 333980 NIL ("ATTACHMENT" ("FILENAME" "title.pdf")) NIL) "MIXED" ("BOUNDARY" "0__=fgrths") NIL NIL))
+</tt></p>
+
+
+<dt>indented:
+<dd>
+
+
+<pre>
+*
+1569
+FETCH
+(
+    BODYSTRUCTURE
+    (
+        (
+            (
+                (<span class="part">"TEXT" "PLAIN"</span> ("CHARSET" "ISO-8859-1") NIL NIL "QUOTED-PRINTABLE" 833 30 NIL NIL NIL)
+                (<span class="part">"TEXT" "HTML"</span> ("CHARSET" "ISO-8859-1") NIL NIL "QUOTED-PRINTABLE" 3412 62 NIL ("INLINE" NIL) NIL)
+                <span class="list">"ALTERNATIVE"</span>
+                ("BOUNDARY" "2__=fgrths")
+                NIL
+                NIL
+            )
+            (<span class="part">"IMAGE" "GIF"</span> ("NAME" "485039.gif") "&lt;2__=lgkfjr&gt;" NIL "BASE64" 64 NIL ("INLINE" ("FILENAME" "485039.gif")) NIL)
+            <span class="list">"RELATED"</span>
+            ("BOUNDARY" "1__=fgrths")
+            NIL
+            NIL
+        )
+        (<span class="part">"APPLICATION" "PDF"</span> ("NAME" "title.pdf") "&lt;1__=lgkfjr&gt;" NIL "BASE64" 333980 NIL ("ATTACHMENT" ("FILENAME" "title.pdf")) NIL)
+        <span class="list">"MIXED"</span>
+        ("BOUNDARY" "0__=fgrths")
+        NIL
+        NIL
+    )
+)
+</pre>
+
+<p>
+As before, attachments are included by a <span
+class="list"><tt>MIXED</tt></span> list that contains both the text of the
+email and the attachments. The text is a <span
+class="list"><tt>RELATED</tt></span> list of text and an image. Text is again
+an <span class="list"><tt>ALTERNATIVE</tt></span> between plain text and html.
+</p>
+
+
+
+<h3>single-element lists</h3>
+
+<p>
+A list may contain a single element. The following email has a single
+<span class="part"><tt>TEXT/HTML</tt></span>
+part enclosed in a
+<span class="list"><tt>MIXED</tt></span> list that only comprises it.
+</p>
+
+<dl>
+
+<dt>IMAP server reply:
+<dd>
+
+<p><tt>
+* 2246 FETCH (BODYSTRUCTURE (("TEXT" "HTML" NIL NIL NIL "7BIT" 151 0 NIL NIL NIL) "MIXED" ("BOUNDARY" "----=rfsewr") NIL NIL))
+</tt></p>
+
+
+<dt>indented:
+<dd>
+
+<pre>
+*
+2246
+FETCH
+(
+    BODYSTRUCTURE
+    (
+        (<span class="part">"TEXT" "HTML"</span> NIL NIL NIL "7BIT" 151 0 NIL NIL NIL)
+        <span class="list">"MIXED"</span>
+        ("BOUNDARY" "----=rfsewr")
+        NIL
+        NIL
+    )
+)
+</pre>
+
+</dl>
+
+
+<h3>structure and parsing</h3>
+
+<p>
+An email comprises various parts (such as text, html, images and attachments),
+combined in various ways (alternative, related, mixed). An invididual part is
+always represented by a list that begins with its content type:
+</p>
+
+<pre>
+("TEXT" "PLAIN" ("CHARSET" "iso-8859-1") NIL NIL "QUOTED-PRINTABLE" 1315 42 NIL NIL NIL NIL)
+("TEXT" "HTML" ("CHARSET" "iso-8859-1") NIL NIL "QUOTED-PRINTABLE" 2987 52 NIL NIL NIL NIL)
+("IMAGE" "GIF" ("NAME" "485039.gif") "&lt;2__=lgkfjr&gt;" NIL "BASE64" 64 NIL ("INLINE" ("FILENAME" "485039.gif")) NIL)
+("APPLICATION" "PDF" ("NAME" "pages.pdf") NIL NIL "BASE64" 38838 NIL ("attachment" ("FILENAME" "pages.pdf")) NIL NIL)
+</pre>
+
+<p>
+Some components of these lists may be missing, but not the first two ones,
+which are always strings:
+</p>
+
+<pre>
+(TYPE SUBTYPE ...)
+</pre>
+
+<p>
+A combination is a sequence of parts followed by the type of combination
+(<tt>ALTERNATIVE</tt>, <tt>RELATED</tt> or <tt>MIXED</tt>) followed by some
+other data of minor importance:
+</p>
+
+<pre>
+(PART1 PART2 PART3 ... "ALTERNATIVE" A B C)
+(PART1 PART2 PART3 ... "RELATED" A B C)
+(PART1 PART2 PART3 ... "MIXED" A B C)
+</pre>
+
+<p>
+Each among <tt>PART1</tt>, <tt>PART2</tt>, <tt>PART3</tt> etc. may itself be an
+individual part (in the form <tt>(TYPE SUBTYPE ...)</tt>) or another
+combination (like <tt>(SUBPART1 SUBPART2 SUBPART3 ... "MIXED" A B C)</tt>).
+</p>
+
+<p>
+This allows for a simple way to discriminate combinations from individual
+parts: <tt>((</tt> is always the begin of a combination of some kind
+(<tt>ALTERNATIVE</tt>, <tt>RELATED</tt> or <tt>MIXED</tt>). The first
+parenthesis is the first character of the combination list; the second
+parenthesis is the first character of the first part. This first part may
+itself be a combination or an individual part, but in both cases begins with an
+open parenthesis. All lists that are not combinations start with <tt>("</tt>.
+</p>
+
+
+
+<h3>sequence numbers</h3>
+
+<p>
+The elements of a list are numbered <tt>1</tt>, <tt>2</tt>, <tt>3</tt>, etc. If
+the first element is also a list, its elements <tt>1.1</tt>, <tt>1.2</tt>,
+<tt>1.3</tt>, etc. These sequences are then used to retrieve a single part of
+an email.
+</p>
+
+<p>
+Calling
+<a href="http://github.com/sgerwk/imapbodystructure">imapbodystructure</a>
+with argument
+<tt>-p</tt> shows the number sequence of each part of an email; with
+<tt>-c</tt>, also the number sequence of combinations is printed. For example,
+one of the body structures above is printed as:
+</p>
+
+<pre>
+*
+1569
+FETCH
+(
+    BODYSTRUCTURE
+    (
+        <span class="seq">[1]</span> (
+            <span class="seq">[1.1]</span> (
+                <span class="seq">[1.1.1]</span> ("TEXT" "PLAIN" ("CHARSET" "ISO-8859-1") NIL NIL "QUOTED-PRINTABLE" 833 30 NIL NIL NIL)
+                <span class="seq">[1.1.2]</span> ("TEXT" "HTML" ("CHARSET" "ISO-8859-1") NIL NIL "QUOTED-PRINTABLE" 3412 62 NIL ("INLINE" NIL) NIL)
+                "ALTERNATIVE"
+                ("BOUNDARY" "2__=fgrths")
+                NIL
+                NIL
+            )
+            <span class="seq">[1.2]</span> ("IMAGE" "GIF" ("NAME" "485039.gif") "&lt;2__=lgkfjr&gt;" NIL "BASE64" 64 NIL ("INLINE" ("FILENAME" "485039.gif")) NIL)
+            "RELATED"
+            ("BOUNDARY" "1__=fgrths")
+            NIL
+            NIL
+        )
+        <span class="seq">[2]</span> ("APPLICATION" "PDF" ("NAME" "title.pdf") "&lt;1__=lgkfjr&gt;" NIL "BASE64" 333980 NIL ("ATTACHMENT" ("FILENAME" "title.pdf")) NIL)
+        "MIXED"
+        ("BOUNDARY" "0__=fgrths")
+        NIL
+        NIL
+    )
+)
+</pre>
+
+<p>
+The parts of this email are retrived by these sequences. For example, the html
+part of this mail of number <tt>1569</tt> has sequence
+<span class="seq"><tt>1.1.2</tt></span>, so the request for this part is:
+<tt>FETCH 1569 BODY[1.1.2]</tt>.
+</p>
+
+</body>
+</html>
+
