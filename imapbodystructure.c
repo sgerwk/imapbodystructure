@@ -8,6 +8,7 @@
  *	-l num		cut lines at num characters
  *	-p 		print the progressive sequence of each part
  *	-c		also print the progressive sequence of combinations
+ *	-o		print the original bodystructure string
  *	-h		help
  *	file		if omitted or '-', read from stdin
  */
@@ -217,6 +218,7 @@ void usage() {
 	printf("\t\t-l num\tcut lines at num characters\n");
 	printf("\t\t-p\tprint the progressive sequence of each part\n");
 	printf("\t\t-c\talso print the progressive sequence of combinations\n");
+	printf("\t\t-o\tprint the original bodystructure string\n");
 	printf("\t\t-h\tthis help\n");
 	printf("\t\tfile\tif omitted or '-', read stdin\n");
 
@@ -229,10 +231,11 @@ int main(int argn, char *argv[]) {
 	FILE *in, *out;
 	char line[5000];
 	int opt;
+	int original = 0;
 
 				/* arguments */
 
-	while (-1 != (opt = getopt(argn, argv, "i:l:pch"))) {
+	while (-1 != (opt = getopt(argn, argv, "i:l:pcoh"))) {
 		switch(opt) {
 		case 'l':
 			maxline = atoi(optarg);
@@ -249,6 +252,9 @@ int main(int argn, char *argv[]) {
 			break;
 		case 'c':
 			combinationsequence = 1;
+			break;
+		case 'o':
+			original = 1;
 			break;
 		case 'h':
 			usage();
@@ -274,9 +280,11 @@ int main(int argn, char *argv[]) {
 				/* print each line as a body structure */
 
 	while (fgets(line, 5000, in)) {
-		fprintf(out, "============================================\n");
-		fprintf(out, "%s", line);
-		fprintf(out, "--------------------------------------------\n");
+		if (original) {
+			fprintf(out, "====================================\n");
+			fprintf(out, "%s", line);
+			fprintf(out, "------------------------------------\n");
+		}
 
 		bodystructureprint(out, line);
 	}
