@@ -289,5 +289,6 @@ int main(int argn, char *argv[]) {
 		bodystructureprint(out, line);
 	}
 
+	fclose(in);
 	return EXIT_SUCCESS;
 }
